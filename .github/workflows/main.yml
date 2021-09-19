@@ -14,7 +14,7 @@ jobs:
       - uses: ammaraskar/sphinx-action@master
         with:
           docs-folder: "docs/"
-          pre-build-command: "python -m pip install myst-parser sphinx_rtd_theme"
+          pre-build-command: "python -m pip install pyopengl myst-parser sphinx_rtd_theme"
       - name: Commit documentation changes
         run: |
           cp -r docs/_build/html/* gh-pages/
