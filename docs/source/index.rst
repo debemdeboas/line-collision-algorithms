@@ -13,9 +13,9 @@ the students Gustavo Geyer and Rafael Almeida de Bem.
    :maxdepth: 2
    :caption: Contents:
 
-   InterseccaoEntreTodasAsLinhas
-   bounding_box
-   spatial_subdivision
+   source/InterseccaoEntreTodasAsLinhas
+   source/bounding_box
+   source/spatial_subdivision
 
 
 Indices and tables
