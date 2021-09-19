@@ -40,6 +40,11 @@ class Linha:
         else:
             self.y2 = self.y1 - deltaY * tamMax
 
+        self.minx = min(self.x1, self.x2)
+        self.miny = min(self.y1, self.y2)
+        self.maxx = max(self.x1, self.x2)
+        self.maxy = max(self.y1, self.y2)
+
 
     """ Desenha a linha na tela atual """
     def desenhaLinha(self):
