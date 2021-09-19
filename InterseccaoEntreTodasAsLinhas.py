@@ -3,7 +3,7 @@
 # COMPUTAÇÃO GRÁFICA
 #
 # Teste de colisão em OpenGL
-#       
+#
 # Marcio Sarroglia Pinho
 # pinho@inf.pucrs.br
 # **********************************************************************
@@ -147,6 +147,40 @@ def check_collision_aabb(box_a: BoundingBox, box_b: BoundingBox) -> bool:
 
 # !!! -------------- Algorithm selection section -------------- !!!
 
+def algo_init_aabb(line: Linha, index: int):
+    """
+    Initialize the AABB structures
+
+    Args:
+        line (Linha):
+            Line whose bounding box is generated and appended to the
+            global `bounding_boxes` list.
+        index (int): Not used, added for compatibility
+    """
+
+    global bounding_boxes
+    bounding_boxes.append(BoundingBox(line))
+
+
+def calculate_intersection_aabb():
+    """
+    Calculate the intersection between all bounding boxes
+
+    Iterates through all bounding boxes skipping those that
+    have already been checked (`bounding_boxes[index_a + 1:]`).
+    """
+
+    global ContChamadas, ContadorInt, bounding_boxes
+    glColor3f(1, 0, 0)
+    for index_a, box_a in enumerate(bounding_boxes):
+        for box_b in bounding_boxes[index_a + 1:]:
+            if check_collision_aabb(box_a, box_b):
+                ContChamadas += 1
+                ContadorInt += 1
+                box_a._line.desenhaLinha()
+                box_b._line.desenhaLinha()
+
+
 def use_aabb():
     """
     Use AABB as the collision detection algorithm
@@ -157,42 +191,50 @@ def use_aabb():
     """
 
     global algo_init, algo_draw, algo_calculate_intersection
-    
-    def algo_init_aabb(line: Linha, index: int):
-        """
-        Initialize the AABB structures
-
-        Args:
-            line (Linha):
-                Line whose bounding box is generated and appended to the
-                global `bounding_boxes` list.
-            index (int): Not used, added for compatibility
-        """
-
-        global bounding_boxes
-        bounding_boxes.append(BoundingBox(line))
-
-    def calculate_intersection_aabb():
-        """
-        Calculate the intersection between all bounding boxes
-
-        Iterates through all bounding boxes skipping those that
-        have already been checked (`bounding_boxes[index_a + 1:]`).
-        """
-
-        global ContChamadas, ContadorInt, bounding_boxes
-        glColor3f(1, 0, 0)
-        for index_a, box_a in enumerate(bounding_boxes):
-            for box_b in bounding_boxes[index_a + 1:]:
-                if check_collision_aabb(box_a, box_b):
-                    ContChamadas += 1
-                    ContadorInt += 1
-                    box_a._line.desenhaLinha()
-                    box_b._line.desenhaLinha()
 
     algo_init = algo_init_aabb
     algo_draw = draw_bounding_boxes
     algo_calculate_intersection = calculate_intersection_aabb
+
+
+def algo_init_ss(line: Linha, index: int):
+    """
+    Initialize the SS structures
+
+    Registers `line` and its index on the global subdivision matrix.
+
+    Args:
+        line (Linha):
+            Used to calculate the spanned cells' coordinates only
+        index (int):
+            Line index to be registered on the necessary cells
+    """
+
+    global subdivision_matrix
+    subdivision_matrix.register_line_on_cells(line, index)
+
+
+def calculate_intersection_ss():
+    """
+    Calculate the intersection between lines using the subdivision matrix
+
+    Iterates through all lines on the global `linhas` array and calculates
+    each line's possible intersection set. A set `Set[int]` is used for its
+    guarenteed uniqueness (an entry can be added only once).
+    """
+
+    global ContChamadas, ContadorInt, linhas, subdivision_matrix
+    glColor3f(1, 0, 0)
+    for index_a, linha_a in enumerate(linhas):
+        candidate_set = subdivision_matrix.generate_candidates(index_a, linhas)
+
+        for index_b, linha_b in enumerate(linhas):
+            if index_b in candidate_set:
+                ContChamadas += 1
+                if HaInterseccao(Ponto(linha_a.x1, linha_a.y1), Ponto(linha_a.x2, linha_a.y2), Ponto(linha_b.x1, linha_b.y1), Ponto(linha_b.x2, linha_b.y2)):
+                    ContadorInt += 1
+                    linha_a.desenhaLinha()
+                    linha_b.desenhaLinha()
 
 
 def use_ss():
@@ -205,48 +247,48 @@ def use_ss():
     """
 
     global algo_init, algo_draw, algo_calculate_intersection
-   
-    def algo_init_ss(line: Linha, index: int):
-        """
-        Initialize the SS structures
-
-        Registers `line`and its index on the global subdivision matrix.
-
-        Args:
-            line (Linha):
-                Used to calculate the spanned cells' coordinates only
-            index (int):
-                Line index to be registered on the necessary cells
-        """
-
-        global subdivision_matrix
-        subdivision_matrix.register_line_on_cells(line, index)
-
-    def calculate_intersection_ss():
-        """
-        Calculate the intersection between lines using the subdivision matrix
-
-        Iterates through all lines on the global `linhas` array and calculates
-        each line's possible intersection set. A set `Set[int]` is used for its
-        guarenteed uniqueness (an entry can be added only once).
-        """
-
-        global ContChamadas, ContadorInt, linhas, subdivision_matrix
-        glColor3f(1, 0, 0)
-        for index_a, linha_a in enumerate(linhas):
-            candidate_set = subdivision_matrix.generate_candidates(index_a, linhas)
-
-            for index_b, linha_b in enumerate(linhas):
-                if index_b in candidate_set:
-                    ContChamadas += 1
-                    if HaInterseccao(Ponto(linha_a.x1, linha_a.y1), Ponto(linha_a.x2, linha_a.y2), Ponto(linha_b.x1, linha_b.y1), Ponto(linha_b.x2, linha_b.y2)):
-                        ContadorInt += 1
-                        linha_a.desenhaLinha()
-                        linha_b.desenhaLinha()
 
     algo_init = algo_init_ss
     algo_draw = draw_spatial_subdivision
     algo_calculate_intersection = calculate_intersection_ss
+
+
+def algo_init_original(line: Linha, index: int):
+    """
+    Not used, added for compatibility
+
+    Args:
+        line (Linha): Not used, added for compatibility
+        index (int): Not used, added for compatibility
+    """
+
+    pass
+
+
+def calculate_intersection_original():
+    """
+    Calculate the intersection between all lines
+
+    Iterates through all lines and calculate each line's intersection
+    with every other line (including those that have already been
+    visited). This is the original implementation.
+    """
+
+    global ContChamadas, ContadorInt, linhas
+    # Original implementation
+    glColor3f(1, 0, 0)
+    PA, PB, PC, PD = Ponto(), Ponto(), Ponto(), Ponto()
+    for i in range(N_LINHAS):
+        PA.set(linhas[i].x1, linhas[i].y1)
+        PB.set(linhas[i].x2, linhas[i].y2)
+        for j in range(N_LINHAS):
+            PC.set(linhas[j].x1, linhas[j].y1)
+            PD.set(linhas[j].x2, linhas[j].y2)
+            ContChamadas += 1
+            if HaInterseccao(PA, PB, PC, PD):
+                ContadorInt += 1
+                linhas[i].desenhaLinha()
+                linhas[j].desenhaLinha()
 
 
 def use_original():
@@ -260,45 +302,43 @@ def use_original():
 
     global algo_init, algo_draw, algo_calculate_intersection
 
-    def algo_init_original(line: Linha, index: int):
-        """
-        Not used, added for compatibility
-
-        Args:
-            line (Linha): Not used, added for compatibility
-            index (int): Not used, added for compatibility
-        """
-
-        pass
-
-    def calculate_intersection_original():
-        """
-        Calculate the intersection between all lines
-
-        Iterates through all lines and calculate each line's intersection
-        with every other line (including those that have already been 
-        visited). This is the original implementation.
-        """
-
-        global ContChamadas, ContadorInt, linhas
-        # Original implementation
-        glColor3f(1, 0, 0)
-        PA, PB, PC, PD = Ponto(), Ponto(), Ponto(), Ponto()
-        for i in range(N_LINHAS):
-            PA.set(linhas[i].x1, linhas[i].y1)
-            PB.set(linhas[i].x2, linhas[i].y2)
-            for j in range(N_LINHAS):
-                PC.set(linhas[j].x1, linhas[j].y1)
-                PD.set(linhas[j].x2, linhas[j].y2)
-                ContChamadas += 1
-                if HaInterseccao(PA, PB, PC, PD):
-                    ContadorInt += 1
-                    linhas[i].desenhaLinha()
-                    linhas[j].desenhaLinha()
-
     algo_init = algo_init_original
     algo_draw = lambda: None
     algo_calculate_intersection = calculate_intersection_original
+
+
+def algo_init_original2(line: Linha, index: int):
+    """
+    Not used, added for compatibility
+
+    Args:
+        line (Linha): Not used, added for compatibility
+        index (int): Not used, added for compatibility
+    """
+
+    pass
+
+
+def calculate_intersection_original2():
+    """
+    Calculate the intersection between all lines
+
+    Iterates through all lines and calculate each line's intersection
+    with every other line (excluding those that have already been
+    visited).
+    """
+
+    global ContChamadas, ContadorInt, linhas
+    # Original implementation (improved)
+    glColor3f(1, 0, 0)
+    for index_a, linha_a in enumerate(linhas):  # Nova implementação mais otimizada
+        for linha_b in linhas[index_a:]:
+            ContChamadas += 1
+
+            if HaInterseccao(Ponto(linha_a.x1, linha_a.y1), Ponto(linha_a.x2, linha_a.y2), Ponto(linha_b.x1, linha_b.y1), Ponto(linha_b.x2, linha_b.y2)):
+                ContadorInt += 1
+                linha_a.desenhaLinha()
+                linha_b.desenhaLinha()
 
 
 def use_original2():
@@ -312,41 +352,10 @@ def use_original2():
 
     global algo_init, algo_draw, algo_calculate_intersection
 
-    def algo_init_original2(line: Linha, index: int):
-        """
-        Not used, added for compatibility
-
-        Args:
-            line (Linha): Not used, added for compatibility
-            index (int): Not used, added for compatibility
-        """
-        
-        pass
-
-    def calculate_intersection_original2():
-        """
-        Calculate the intersection between all lines
-
-        Iterates through all lines and calculate each line's intersection
-        with every other line (excluding those that have already been 
-        visited).
-        """
-
-        global ContChamadas, ContadorInt, linhas
-        # Original implementation (improved)
-        glColor3f(1, 0, 0)
-        for index_a, linha_a in enumerate(linhas):  # Nova implementação mais otimizada
-            for linha_b in linhas[index_a:]:
-                ContChamadas += 1
-
-                if HaInterseccao(Ponto(linha_a.x1, linha_a.y1), Ponto(linha_a.x2, linha_a.y2), Ponto(linha_b.x1, linha_b.y1), Ponto(linha_b.x2, linha_b.y2)):
-                    ContadorInt += 1
-                    linha_a.desenhaLinha()
-                    linha_b.desenhaLinha()
-
     algo_init = algo_init_original2
     algo_draw = lambda: None
     algo_calculate_intersection = calculate_intersection_original2
+
 
 # Dictionary that defines the algorithm that will be used during execution
 possible_intersection_algorithms = {
@@ -370,8 +379,17 @@ if len(sys.argv) > 1:  # If an algorithm code was passed via CLI...
             print(cell_size)
         except:
             cell_size = (16, 16)
-else:  # Default algorithm
-    algo_ = 'aabb'
+else:  # Fail, need to pass algorithm
+    algo_init = lambda: None
+    algo_draw = lambda: None
+    algo_calculate_intersection = lambda: None
+    print('Please provide a supported algorithm from the list:', ', '.join(possible_intersection_algorithms.keys()))
+    exit(1)
+
+algo_init = lambda: None  # Reset generic functions
+algo_draw = lambda: None  # Reset generic functions
+algo_calculate_intersection = lambda: None  # Reset generic functions
+
 possible_intersection_algorithms[algo_.lower()]()  # Setup algorithm variables and callables
 
 
@@ -387,7 +405,7 @@ def init():
 
     linhas = [Linha() for _ in range(N_LINHAS)]
     bounding_boxes = []
-    subdivision_matrix = Matrix((MAX_X, MAX_X), cell_size)
+    subdivision_matrix = Matrix((MAX_X, MAX_X), (cell_size[0], cell_size[1]))
 
     for index, linha in enumerate(linhas):
         linha.geraLinha(MAX_X, 10)
@@ -542,56 +560,56 @@ def mouseMove(x: int, y: int):
     glutPostRedisplay()
 
 
-# ***********************************************************************************
-# Programa Principal
-# ***********************************************************************************
+if __name__ == '__main__':
+    # ***********************************************************************************
+    # Programa Principal
+    # ***********************************************************************************
 
-glutInit(sys.argv)
-glutInitDisplayMode(GLUT_RGBA)
+    glutInit(sys.argv)
+    glutInitDisplayMode(GLUT_RGBA)
 
-# Define o tamanho inicial da janela grafica do programa
-glutInitWindowSize(650, 500)
-# Cria a janela na tela, definindo o nome da
-# que aparecera na barra de título da janela.
-glutInitWindowPosition(100, 100)
-wind = glutCreateWindow("Algorimos de Cálculo de Colisão")
+    # Define o tamanho inicial da janela grafica do programa
+    glutInitWindowSize(650, 500)
+    # Cria a janela na tela, definindo o nome da
+    # que aparecera na barra de título da janela.
+    glutInitWindowPosition(100, 100)
+    wind = glutCreateWindow("Algorimos de Cálculo de Colisão")
 
-# executa algumas inicializações
-init()
+    # executa algumas inicializações
+    init()
 
-# Define que o tratador de evento para
-# o redesenho da tela. A funcao "display"
-# será chamada automaticamente quando
-# for necessário redesenhar a janela
-glutDisplayFunc(display)
-glutIdleFunc(animate)
+    # Define que o tratador de evento para
+    # o redesenho da tela. A funcao "display"
+    # será chamada automaticamente quando
+    # for necessário redesenhar a janela
+    glutDisplayFunc(display)
+    glutIdleFunc(animate)
 
-# o redimensionamento da janela. A funcao "reshape"
-# Define que o tratador de evento para
-# será chamada automaticamente quando
-# o usuário alterar o tamanho da janela
-glutReshapeFunc(reshape)
+    # o redimensionamento da janela. A funcao "reshape"
+    # Define que o tratador de evento para
+    # será chamada automaticamente quando
+    # o usuário alterar o tamanho da janela
+    glutReshapeFunc(reshape)
 
-# Define que o tratador de evento para
-# as teclas. A funcao "keyboard"
-# será chamada automaticamente sempre
-# o usuário pressionar uma tecla comum
-glutKeyboardFunc(keyboard)
-    
-# Define que o tratador de evento para
-# as teclas especiais(F1, F2,... ALT-A,
-# ALT-B, Teclas de Seta, ...).
-# A funcao "arrow_keys" será chamada
-# automaticamente sempre o usuário
-# pressionar uma tecla especial
-glutSpecialFunc(arrow_keys)
+    # Define que o tratador de evento para
+    # as teclas. A funcao "keyboard"
+    # será chamada automaticamente sempre
+    # o usuário pressionar uma tecla comum
+    glutKeyboardFunc(keyboard)
 
-#glutMouseFunc(mouse)
-#glutMotionFunc(mouseMove)
+    # Define que o tratador de evento para
+    # as teclas especiais(F1, F2,... ALT-A,
+    # ALT-B, Teclas de Seta, ...).
+    # A funcao "arrow_keys" será chamada
+    # automaticamente sempre o usuário
+    # pressionar uma tecla especial
+    glutSpecialFunc(arrow_keys)
 
+    #glutMouseFunc(mouse)
+    #glutMotionFunc(mouseMove)
 
-try:
-    # inicia o tratamento dos eventos
-    glutMainLoop()
-except SystemExit:
-    pass
+    try:
+        # inicia o tratamento dos eventos
+        glutMainLoop()
+    except SystemExit:
+        pass
