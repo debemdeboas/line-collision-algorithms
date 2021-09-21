@@ -3,11 +3,13 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Documentação de Algorimos de Cálculo de Colisão!
+Welcome to Collision Detection Algorithm's documentation!
 =============================================================
 
 This documentation only contains functions and classes written by
 the students Gustavo Geyer and Rafael Almeida de Bem.
+
+.. mdinclude:: ../../README.md
 
 .. toctree::
    :maxdepth: 2

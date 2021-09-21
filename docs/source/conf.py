@@ -30,7 +30,7 @@ author = 'Gustavo Geyer, Marcio Sarroglia Pinho, Rafael Almeida de Bem'
 extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.autodoc',
-    'myst_parser'
+    'm2r2'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -81,7 +81,7 @@ napoleon_type_aliases = None
 napoleon_attr_annotations = True
 
 
-source_suffix = {
-    '.rst': 'restructuredtext',
-    '.md': 'markdown',
-}
+# source_suffix = {
+#     '.rst': 'restructuredtext',
+#     '.md': 'markdown',
+# }
