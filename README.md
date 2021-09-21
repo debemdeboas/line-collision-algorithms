@@ -3,6 +3,8 @@
 [This repository](https://github.com/debemdeboas/line-collision-algorithms) contains the implementation of three (four-ish) line collision algorithms: 
 brute force, axis aligned bounding boxes (AABB) and regular spatial subdivision.
 
+The documentation is also available [here](https://debemdeboas.github.io/line-collision-algorithms/).
+
 ## Environment
 
 **Python 3.9 or higher is required.**
