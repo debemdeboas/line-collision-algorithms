@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../../'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'Collision Detection Algorithm'
+project = 'Collision Detection Algorithms'
 copyright = '2021, Gustavo Geyer, Marcio Sarroglia Pinho, Rafael Almeida de Bem'
 author = 'Gustavo Geyer, Marcio Sarroglia Pinho, Rafael Almeida de Bem'
 
