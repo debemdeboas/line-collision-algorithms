@@ -3,7 +3,7 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Collision Detection Algorithm's documentation!
+Welcome to Collision Detection Algorithms' documentation!
 =============================================================
 
 This documentation only contains functions and classes written by
